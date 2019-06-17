@@ -76,7 +76,7 @@ void test_name(test_result_t* result, const char* name)
 }
 
 
-void test_run(const test_t* tests, size_t n_tests)
+int test_run(const test_t* tests, size_t n_tests)
 {
 	size_t n_passed = 0;
 	PSTDOUT("--------------------------------------------------------\n");
@@ -89,7 +89,12 @@ void test_run(const test_t* tests, size_t n_tests)
 	PSTDOUT("[%s] %d/%d test cases passed.\n",
 		passed ? "PASS" : "FAIL", n_passed, n_tests);
 	PSTDOUT("--------------------------------------------------------\n");
+	return (int)(n_tests - n_passed);
 }
+
+
+#undef PSTDERR
+#undef PSTDOUT
 
 
 #undef ERROR
