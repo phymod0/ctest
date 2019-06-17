@@ -23,14 +23,14 @@ static void print_test_results(test_result_t* result)
 	const char* test_name = result->test_name;
 	if (!test_name)
 		test_name = "(unnamed)";
-	PSTDOUT("[%s] Test %s: %d/%d checks passed", status, test_name,
+	PSTDOUT("[%s] Test %s: %llu/%llu checks passed", status, test_name,
 		result->passed, result->total);
 	if (result->n_failed_names == 0) {
 		PSTDOUT(".\n");
 		return;
 	}
 	PSTDOUT(" (failed checks: %s", result->failed_checknames[0]);
-	for (int i=1; i<result->n_failed_names; ++i)
+	for (unsigned long long i=1; i<result->n_failed_names; ++i)
 		PSTDOUT(", %s", result->failed_checknames[i]);
 	PSTDOUT(").\n");
 }
@@ -86,7 +86,7 @@ int test_run(const test_t* tests, size_t n_tests)
 			++n_passed;
 	PSTDOUT("*********************** ALL DONE ***********************\n");
 	bool passed = n_passed == n_tests;
-	PSTDOUT("[%s] %d/%d test cases passed.\n",
+	PSTDOUT("[%s] %lu/%lu test cases passed.\n",
 		passed ? "PASS" : "FAIL", n_passed, n_tests);
 	PSTDOUT("--------------------------------------------------------\n");
 	return (int)(n_tests - n_passed);
