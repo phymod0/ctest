@@ -5,6 +5,10 @@
 #include <stdbool.h>
 
 
+#define PSTDOUT(...) fprintf(stdout, __VA_ARGS__)
+#define PSTDERR(...) fprintf(stderr, __VA_ARGS__)
+
+
 typedef struct test_result {
 	char* test_name;
 	unsigned long long passed, total;
@@ -16,16 +20,16 @@ typedef struct test_result {
 static void print_test_results(test_result_t* result)
 {
 	char* status = result.passed == result.total ? "PASS" : "FAIL";
-	fprintf(stderr, "[%s] Test \"%s\": %d/%d checks passed",
-		status, result.test_name, result.passed, result.total);
+	PSTDOUT("[%s] Test \"%s\": %d/%d checks passed", status,
+		result.test_name, result.passed, result.total);
 	if (result.n_failed_names == 0) {
-		fprintf(stderr, ".\n");
+		PSTDOUT(".\n");
 		return;
 	}
-	fprintf(stderr, " (failed checks: %s", result.failed_checknames[0]);
+	PSTDOUT(" (failed checks: %s", result.failed_checknames[0]);
 	for (int i=1; i<result.n_failed_names; ++i)
-		fprintf(stderr, ", %s", result.failed_checknames[j]);
-	fprintf(stderr, ").\n");
+		PSTDOUT(", %s", result.failed_checknames[j]);
+	PSTDOUT(").\n");
 }
 
 
@@ -59,8 +63,7 @@ void test_check(test_result_t* result, const char* name, bool check)
 	if (result.n_failed_names < MAX_CHECKNAMES_PER_UNIT)
 		result.failed_checknames[result.n_failed_names++] = name;
 	else
-		fprintf(stderr, "Cannot record check failure name (full "
-			"buffer).\n");
+		PSTDERR("Cannot record check failure name (buffer full).\n");
 }
 
 
@@ -73,14 +76,17 @@ void test_name(test_result_t* result, const char* name)
 void test_run(const test_t* tests, size_t n_tests)
 {
 	size_t n_passed = 0;
-	fprintf(stderr, "------------------------------------------------\n");
-	fprintf(stderr, "************** RUNNING TEST CASES **************\n");
+	PSTDOUT("------------------------------------------------\n");
+	PSTDOUT("************** RUNNING TEST CASES **************\n");
 	for (size_t i=0; i<n_tests; ++i)
 		if (run_single_test(tests[i]))
 			++n_passed;
-	fprintf(stderr, "******************* ALL DONE *******************\n");
+	PSTDOUT("******************* ALL DONE *******************\n");
 	bool passed = n_passed == n_tests;
-	fprintf(stderr, "[%s] %d/%d test cases passed.\n",
+	PSTDOUT("[%s] %d/%d test cases passed.\n",
 		passed ? "PASS" : "FAIL", n_passed, n_tests);
-	fprintf(stderr, "------------------------------------------------\n");
+	PSTDOUT("------------------------------------------------\n");
 }
+
+
+#undef ERROR
