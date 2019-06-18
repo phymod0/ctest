@@ -1,11 +1,14 @@
-SRC_FILES := $(wildcard test_*.c)
 INCLUDE_DIRS := ../src/ ../
-TESTS := $(patsubst %.c,%,$(SRC_FILES))
 CFLAGS := -g -Wall -Werror -Wextra
 CFLAGS += $(patsubst %,-I%,$(INCLUDE_DIRS))
 
-all: $(TESTS)
+SRC_FILES := $(wildcard test_*.c)
+TESTS := $(patsubst %.c,%,$(SRC_FILES))
+
+.DELETE_ON_ERROR:
+check: $(TESTS)
+	@rm -rf $(TESTS)
 $(TESTS):
-	$(CC) $(CFLAGS) ctest.c $@.c $(patsubst test_%,../src/%.c,$@) -o $@
-	./$@
-	rm -rf $@
+	@$(CC) $(CFLAGS) ctest.c $@.c -o $@
+	@./$@
+	@rm -rf $(TESTS)

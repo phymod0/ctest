@@ -2,10 +2,17 @@
 
 #include <time.h>
 #include <stdio.h>
+#include <string.h>
 
 
 #define PSTDOUT(...) fprintf(stdout, __VA_ARGS__)
 #define PSTDERR(...) fprintf(stderr, __VA_ARGS__)
+
+#define RED "\x1B[31m"
+#define GREEN "\x1B[32m"
+#define BLUE "\x1B[34m"
+#define YELLOW "\x1B[33m"
+#define RESET "\033[01;30m"
 
 
 typedef struct test_result {
@@ -16,22 +23,26 @@ typedef struct test_result {
 } test_result_t;
 
 
+static const char* status_str(bool condition)
+{
+	return condition ? GREEN "PASS" RESET : RED "FAIL" RESET;
+}
+
+
 static void print_test_results(test_result_t* result)
 {
-	const char* status = result->passed == result->total ? "PASS" : "FAIL";
+	const char* status = status_str(result->passed == result->total);
 	const char* test_name = result->test_name;
 	if (!test_name)
 		test_name = "(unnamed)";
-	PSTDOUT("[%s] Test %s: %llu/%llu checks passed", status, test_name,
+	PSTDOUT("[%s] Test %s: %llu/%llu checks passed\n", status, test_name,
 		result->passed, result->total);
-	if (result->n_failed_names == 0) {
-		PSTDOUT(".\n");
+	if (result->n_failed_names == 0)
 		return;
+	for (unsigned long long i=0; i<result->n_failed_names; ++i) {
+		PSTDOUT("\t[" RED "Failed #%llu" RESET "] ", i + 1);
+		PSTDOUT("%s\n", result->failed_checknames[i]);
 	}
-	PSTDOUT(" (failed checks: %s", result->failed_checknames[0]);
-	for (unsigned long long i=1; i<result->n_failed_names; ++i)
-		PSTDOUT(", %s", result->failed_checknames[i]);
-	PSTDOUT(").\n");
 }
 
 
@@ -44,6 +55,18 @@ static bool run_single_test(test_t test)
 	print_test_results(&result);
 
 	return result.passed == result.total;
+}
+
+
+static void print_bar(const char* color, const char* hdr)
+{
+	size_t hdr_len = strlen(hdr), n_dashes = PRINT_WIDTH - 4 - hdr_len;
+	for (size_t i=0; i<(n_dashes+1)/2; ++i)
+		PSTDOUT("-");
+	PSTDOUT("[ %s%s%s ]", color, hdr, RESET);
+	for (size_t i=0; i<n_dashes/2; ++i)
+		PSTDOUT("-");
+	PSTDOUT("\n");
 }
 
 
@@ -75,22 +98,28 @@ void test_name(test_result_t* result, const char* name)
 }
 
 
-int test_run(const test_t* tests, size_t n_tests)
+int test_run(const test_t* tests, size_t n_tests, const char* module_name)
 {
 	size_t n_passed = 0;
-	PSTDOUT("--------------------------------------------------------\n");
-	PSTDOUT("****************** RUNNING TEST CASES ******************\n");
+	PSTDOUT("\n");
+	print_bar(RESET, module_name);
 	for (size_t i=0; i<n_tests; ++i)
 		if (run_single_test(tests[i]))
 			++n_passed;
-	PSTDOUT("*********************** ALL DONE ***********************\n");
 	bool passed = n_passed == n_tests;
-	PSTDOUT("[%s] %lu/%lu test cases passed.\n",
-		passed ? "PASS" : "FAIL", n_passed, n_tests);
-	PSTDOUT("--------------------------------------------------------\n");
+	char result[PRINT_WIDTH - 4];
+	snprintf(result, sizeof result, "Passed %lu/%lu", n_passed, n_tests);
+	print_bar(passed ? GREEN : RED, result);
+	PSTDOUT("\n");
 	return (int)(n_tests - n_passed);
 }
 
+
+#undef RESET
+#undef YELLOW
+#undef BLUE
+#undef GREEN
+#undef RED
 
 #undef PSTDERR
 #undef PSTDOUT
