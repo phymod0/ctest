@@ -1,4 +1,5 @@
 #include "ctest.h"
+#include "example.c"
 
 
 TEST_DEFINE(test_add_ints, res)
