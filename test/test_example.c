@@ -8,8 +8,9 @@ TEST_DEFINE(test_add_ints, res)
 	TEST_AUTONAME(res);
 	int a = 2, b = 3, sum = a + b;
 
-	test_check(res, "Addition succeeded", add_ints(a, b) == sum);
-	test_acheck(res, a*b == 5);
+	test_check(res, "Addition #1 succeeded", add_ints(a, b) == sum - 1);
+	test_check(res, "Addition #2 succeeded", add_ints(a, b) == sum);
+	test_check(res, "Addition #3 succeeded", add_ints(a, b) == sum + 1);
 }
 
 TEST_DEFINE(test_str_reverse, res)
