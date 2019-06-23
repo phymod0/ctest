@@ -1,31 +1,39 @@
-#include "ctest.h"
 #include "example.c"
+
+#include "ctest.h"
 
 
 TEST_DEFINE(test_add_ints, res)
 {
 	TEST_AUTONAME(res);
-	int a = 2, b = 3;
-	test_acheck(res, a+b == 5);
-	test_check(res, "Multiplication", a*b == 6);
+	int a = 2, b = 3, sum = a + b;
+
+	test_check(res, "Addition succeeded", add_ints(a, b) == sum);
+	test_acheck(res, a*b == 5);
 }
 
-TEST_DEFINE(test_hello_reverse, res)
+TEST_DEFINE(test_str_reverse, res)
 {
-	// TEST_AUTONAME(res);
-	char arr[] = "hello";
-	char rev[] = "olleh";
+	test_name(res, "ReverseTest");
+
+	char arr[] = "Hello world!";
+	char rev[sizeof arr];
+	reverse(rev, arr);
+
 	bool equal = true;
 	size_t len = (sizeof arr) - 1;
 	for (size_t i=0; i<len; ++i)
-		if (arr[i] != rev[len-i-1])
+		if (arr[i] != rev[len-i-1]) {
 			equal = false;
-	test_check(res, "Reverse test", equal);
+			break;
+		}
+
+	test_check(res, "Successfully reversed", equal);
 }
 
 
 TEST_START
 (
 	test_add_ints,
-	test_hello_reverse,
+	test_str_reverse,
 )
